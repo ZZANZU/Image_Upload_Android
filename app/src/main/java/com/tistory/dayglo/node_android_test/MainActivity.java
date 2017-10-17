@@ -1,7 +1,11 @@
 package com.tistory.dayglo.node_android_test;
 
 import android.content.ActivityNotFoundException;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -88,5 +92,33 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(data == null) {
+            return;
+        }
+
+        switch (requestCode) {
+            case 100:
+                if(resultCode == RESULT_OK) { // 이 부분 디버깅함.
+                    image_path = getPathFromURI(data.getData());
+                    Log.d("CJ", "image path : " + image_path);
+
+                    img.setImageURI(data.getData());
+                    upload_btn.setVisibility(View.VISIBLE);
+                }
+        }
+    }
+
+    private String getPathFromURI(Uri contentUri) {
+        String[] proj = { MediaStore.Images.Media.DATA }; // what
+        CursorLoader loader = new CursorLoader(getApplicationContext(), contentUri, proj, null, null, null);
+        Cursor cursor = loader.loadInBackground();
+
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+
+        return cursor.getString(column_index);
     }
 }
